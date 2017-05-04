@@ -10,6 +10,11 @@ import (
 const song = "0TB7xPRIQ6sZqH8q50maWh"
 
 func main() {
+	err := spoty.Connect()
+	if err != nil {
+		panic(fmt.Sprintf("Could not Connect: %+v\n", err))
+	}
+
 	result, err := spoty.Status()
 	if err != nil {
 		panic(fmt.Sprintf("Could not get status: %+v\n", err))

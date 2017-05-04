@@ -90,6 +90,9 @@ if __name__ == '__main__':
     oauth_token = get_oauth_token()
     csrf_token = get_csrf_token()
 
+    print csrf_token
+    print oauth_token
+
     print "Playing album.."
     play(oauth_token, csrf_token, 'spotify:album:6eWtdQm0hSlTgpkbw4LaBG')
     time.sleep(5)

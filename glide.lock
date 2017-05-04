@@ -1,10 +1,16 @@
-hash: c8211edef94941975950e2620b3e85242c4e4fa3aac62b69e05f306de09d20a6
-updated: 2017-05-04T13:41:39.972653359-03:00
+hash: 0a66e4ebc0d00e65a380d0a4ec04f32174dbfb195ff5818153c62e4422a91adb
+updated: 2017-05-04T13:47:10.728376495-03:00
 imports:
 - name: github.com/lucasefe/spotcast
-  version: c188a8fca7085fe2eaadf391eeeebd29378c2482
+  version: 4378ace4a7b1da00985727eec0b472024dfc2b16
   subpackages:
   - spoty
+- name: github.com/moul/http2curl
+  version: 4e24498b31dba4683efb9d35c1c8a91e2eda28c8
 - name: github.com/parnurzeal/gorequest
   version: f441e24175ffc865a6354b65375e537201c51382
+- name: golang.org/x/net
+  version: 236b8f043b920452504e263bc21d354427127473
+  subpackages:
+  - publicsuffix
 testImports: []
