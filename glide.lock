@@ -1,0 +1,10 @@
+hash: c8211edef94941975950e2620b3e85242c4e4fa3aac62b69e05f306de09d20a6
+updated: 2017-05-04T13:41:39.972653359-03:00
+imports:
+- name: github.com/lucasefe/spotcast
+  version: c188a8fca7085fe2eaadf391eeeebd29378c2482
+  subpackages:
+  - spoty
+- name: github.com/parnurzeal/gorequest
+  version: f441e24175ffc865a6354b65375e537201c51382
+testImports: []

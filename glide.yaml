@@ -3,3 +3,4 @@ import:
 - package: github.com/lucasefe/spotcast
   subpackages:
   - spoty
+- package: github.com/parnurzeal/gorequest
