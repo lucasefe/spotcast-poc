@@ -8,43 +8,11 @@ import (
 	"github.com/parnurzeal/gorequest"
 )
 
-// StatusResult represent the result of a status call
-type StatusResult struct {
-	ClientVersion string `json:"client_version"`
-	Version       int    `json:"version"`
+var defaultReturnOn = []string{"login", "logout", "play", "pause", "error", "ap"}
 
-	Running bool `json:"running"`
-	Playing bool `json:"playing"`
-	Shuffle bool `json:"shuffle"`
-	Repeat  bool `json:"repeat"`
-
-	Track struct {
-		TrackResource struct {
-			Name     string `json:"name"`
-			URI      string `json:"uri"`
-			Location struct {
-				OG string `json:"og"`
-			} `json:"location"`
-		} `json:"track_resource"`
-		ArtistResource struct {
-			Name     string `json:"name"`
-			URI      string `json:"uri"`
-			Location struct {
-				OG string `json:"og"`
-			} `json:"location"`
-		} `json:"artist_resource"`
-		AlbumResource struct {
-			Name     string `json:"name"`
-			URI      string `json:"uri"`
-			Location struct {
-				OG string `json:"og"`
-			} `json:"location"`
-		} `json:"album_resource"`
-	} `json:"track"`
-}
-
-// PlayResult represent the result of a play call
-type PlayResult struct{}
+const (
+	openSpotifyURL = "https://open.spotify.com"
+)
 
 // Session is the session data
 type Session struct {
@@ -53,8 +21,6 @@ type Session struct {
 }
 
 var session *Session
-
-var defaultReturnOn = []string{"login", "logout", "play", "pause", "error", "ap"}
 
 // Connect connects to the local server and gets session data
 func Connect() error {
@@ -74,10 +40,7 @@ func Connect() error {
 
 	session = &Session{CSRF: csfrToken, OAuth: oauthToken}
 
-	fmt.Printf("Session: %+v\n", session)
-
 	return nil
-
 }
 
 // Status fetches the current status
@@ -92,7 +55,7 @@ func Status() (*StatusResult, error) {
 	result := &StatusResult{}
 
 	request := gorequest.New()
-	_, body, errors := request.Get(getURL(fmt.Sprintf("/remote/status.json?%s", data))).
+	_, _, errors := request.Get(getURL(fmt.Sprintf("/remote/status.json?%s", data))).
 		Set("Origin", "https://open.spotify.com").
 		Send(data).
 		EndStruct(result)
@@ -101,7 +64,7 @@ func Status() (*StatusResult, error) {
 		return nil, fmt.Errorf("Can't fetch status: %+v", errors)
 	}
 
-	fmt.Printf("BODY %+v\n", string(body))
+	// fmt.Printf("BODY %+v\n", string(body))
 
 	return result, nil
 }
@@ -116,9 +79,12 @@ func getOauthToken() (string, error) {
 	oauthToken := struct {
 		Token string `json:"t"`
 	}{}
+
 	request := gorequest.New()
-	request.Get("https://open.spotify.com/token").
-		EndStruct(&oauthToken)
+	_, _, errs := request.Get(fmt.Sprintf("%s/token", openSpotifyURL)).EndStruct(&oauthToken)
+	if len(errs) > 0 {
+		return "", fmt.Errorf("Can't fetch csrf status: %+v", errs)
+	}
 
 	return oauthToken.Token, nil
 }
@@ -129,9 +95,13 @@ func getCSRFToken() (string, error) {
 	}{}
 
 	request := gorequest.New()
-	request.Get(getURL("/simplecsrf/token.json")).
-		Set("Origin", "https://open.spotify.com").
+	_, _, errs := request.Get(getURL("/simplecsrf/token.json")).
+		Set("Origin", openSpotifyURL).
 		EndStruct(&authToken)
+
+	if len(errs) > 0 {
+		return "", fmt.Errorf("Can't fetch csrf status: %+v", errs)
+	}
 
 	return authToken.Token, nil
 }
@@ -140,6 +110,7 @@ func getURL(path string) string {
 	return fmt.Sprintf("https://%s:%d%s", generateLocalHostname(), 4370, path)
 }
 
+// TODO: It needs to be dynamic.
 func generateLocalHostname() string {
 	return "lucasefe.spotilocal.com"
 }
