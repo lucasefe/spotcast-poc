@@ -4,10 +4,11 @@ import (
 	"github.com/lucasefe/spotcast/spoty"
 
 	"fmt"
+	"time"
 )
 
 // Wrecking..
-const song = "0TB7xPRIQ6sZqH8q50maWh"
+const song = "spotify:album:6eWtdQm0hSlTgpkbw4LaBG"
 
 func main() {
 	err := spoty.Connect()
@@ -30,6 +31,13 @@ func main() {
 	result, err = spoty.Status()
 	if err != nil {
 		panic(fmt.Sprintf("Could not get status: %+v\n", err))
+	}
+
+	time.Sleep(15 * time.Second)
+
+	_, err = spoty.Pause()
+	if err != nil {
+		panic(fmt.Sprintf("Could not pause song: %+v\n", err))
 	}
 
 	fmt.Printf("Status: %+v\n", result)

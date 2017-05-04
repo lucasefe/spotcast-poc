@@ -56,7 +56,7 @@ func Status() (*StatusResult, error) {
 
 	request := gorequest.New()
 	_, _, errors := request.Get(getURL(fmt.Sprintf("/remote/status.json?%s", data))).
-		Set("Origin", "https://open.spotify.com").
+		Set("Origin", openSpotifyURL).
 		Send(data).
 		EndStruct(result)
 
@@ -64,14 +64,55 @@ func Status() (*StatusResult, error) {
 		return nil, fmt.Errorf("Can't fetch status: %+v", errors)
 	}
 
-	// fmt.Printf("BODY %+v\n", string(body))
-
 	return result, nil
 }
 
 // Play plays a song in the local spotify, provided it's open.
-func Play(song string) (*PlayResult, error) {
-	return &PlayResult{}, nil
+func Play(song string) (*StatusResult, error) {
+	if session == nil {
+		return nil, errors.New("Not connected")
+	}
+
+	dataFormat := `oauth=%s&csrf=%s&uri=%s&context=%v}`
+	data := fmt.Sprintf(dataFormat, session.OAuth, session.CSRF, song, song)
+
+	result := &StatusResult{}
+
+	request := gorequest.New()
+	_, _, errors := request.Get(getURL(fmt.Sprintf("/remote/play.json?%s", data))).
+		Set("Origin", openSpotifyURL).
+		Send(data).
+		EndStruct(result)
+
+	if len(errors) > 0 {
+		return nil, fmt.Errorf("Can't fetch status: %+v", errors)
+	}
+
+	return result, nil
+}
+
+// Pause plays a song in the local spotify, provided it's open.
+func Pause() (*StatusResult, error) {
+	if session == nil {
+		return nil, errors.New("Not connected")
+	}
+
+	dataFormat := `oauth=%s&csrf=%s&pause=true`
+	data := fmt.Sprintf(dataFormat, session.OAuth, session.CSRF)
+
+	result := &StatusResult{}
+
+	request := gorequest.New()
+	_, _, errors := request.Get(getURL(fmt.Sprintf("/remote/pause.json?%s", data))).
+		Set("Origin", openSpotifyURL).
+		Send(data).
+		EndStruct(result)
+
+	if len(errors) > 0 {
+		return nil, fmt.Errorf("Can't fetch status: %+v", errors)
+	}
+
+	return result, nil
 }
 
 // Private stuff
