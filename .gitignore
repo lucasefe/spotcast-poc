@@ -1,2 +1,5 @@
 vendor
+cli/cli
+server/server
+client/client
 

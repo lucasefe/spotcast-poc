@@ -9,3 +9,9 @@ For now, manage your local spotify.
     cli pause
     cli status
     cli search Bon Jovi
+
+
+
+## TODO
+
+* learn more about the local webser api

@@ -15,8 +15,8 @@ projects:
   generate: false
   test: false
   bin: true
-  build: false
-  run: true
+  build: true
+  run: false
   watcher:
     preview: false
     paths:
@@ -36,8 +36,8 @@ projects:
   generate: false
   test: false
   bin: true
-  build: false
-  run: true
+  build: true
+  run: false
   watcher:
     preview: false
     paths:
@@ -57,8 +57,8 @@ projects:
   generate: false
   test: false
   bin: true
-  build: false
-  run: true
+  build: true
+  run: false
   watcher:
     preview: false
     paths:
