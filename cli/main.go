@@ -1,41 +1,51 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"time"
+	"os"
 
 	"bitbucket.org/lucasefe/spotcast/spoty"
 )
 
-const song = "spotify:album:6eWtdQm0hSlTgpkbw4LaBG"
+const defaultSong = "spotify:album:6eWtdQm0hSlTgpkbw4LaBG"
 
 func main() {
 	spoty.EnableVerbose()
+	spoty.Connect()
 
-	err := spoty.Connect()
-	if err != nil {
-		panic(fmt.Sprintf("Could not Connect: %+v\n", err))
+	if len(os.Args) == 1 {
+		fmt.Println("Not enough arguments")
+		os.Exit(1)
 	}
 
-	_, err = spoty.Status()
-	if err != nil {
-		panic(fmt.Sprintf("Could not get status: %+v\n", err))
-	}
+	switch os.Args[1] {
+	case "play":
+		song := defaultSong
+		if len(os.Args) > 2 {
+			song = os.Args[2]
+		}
+		result, err := spoty.Play(song)
+		if err != nil {
+			panic(fmt.Sprintf("Could not play song: %+v\n", err))
+		}
+		fmt.Printf("Status: %+v", result)
+	case "pause":
+		result, err := spoty.Pause()
+		if err != nil {
+			panic(fmt.Sprintf("Could not get status: %+v\n", err))
+		}
 
-	_, err = spoty.Play(song)
-	if err != nil {
-		panic(fmt.Sprintf("Could not play song: %+v\n", err))
-	}
+		fmt.Printf("Status: %+v", result)
+	case "status":
+		result, err := spoty.Status()
+		if err != nil {
+			panic(fmt.Sprintf("Could not get status: %+v\n", err))
+		}
 
-	_, err = spoty.Status()
-	if err != nil {
-		panic(fmt.Sprintf("Could not get status: %+v\n", err))
-	}
-
-	time.Sleep(15 * time.Second)
-
-	_, err = spoty.Pause()
-	if err != nil {
-		panic(fmt.Sprintf("Could not pause song: %+v\n", err))
+		fmt.Printf("Status: %+v", result)
+	default:
+		flag.PrintDefaults()
+		os.Exit(1)
 	}
 }
