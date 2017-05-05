@@ -1,6 +1,8 @@
-hash: 76cca8f0668c78e8e2df875449a00d4776dfcb2693b2998d5735432d72a9d932
-updated: 2017-05-04T23:09:54.207027012-03:00
+hash: 044ab117588ad4c3920adfacc163ace7297d1850db42cb7d0226792574fbb8f6
+updated: 2017-05-05T12:45:50.536949568-03:00
 imports:
+- name: github.com/gorilla/websocket
+  version: a91eba7f97777409bc2c443f5534d41dd20c5720
 - name: github.com/mattn/go-colorable
   version: ded68f7a9561c023e790de24279db7ebf473ea80
 - name: github.com/mattn/go-isatty
