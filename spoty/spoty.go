@@ -44,7 +44,7 @@ func Connect() error {
 }
 
 // Status fetches the current status
-func Status() (*StatusResult, error) {
+func Status() (*Result, error) {
 	if session == nil {
 		return nil, errors.New("Not connected")
 	}
@@ -52,7 +52,7 @@ func Status() (*StatusResult, error) {
 	dataFormat := `oauth=%s&csrf=%s&returnafter=1&returnon=%v}`
 	data := fmt.Sprintf(dataFormat, session.OAuth, session.CSRF, strings.Join(defaultReturnOn, ","))
 
-	result := &StatusResult{}
+	result := &Result{}
 
 	request := gorequest.New()
 	_, _, errors := request.Get(getURL(fmt.Sprintf("/remote/status.json?%s", data))).
@@ -68,7 +68,7 @@ func Status() (*StatusResult, error) {
 }
 
 // Play plays a song in the local spotify, provided it's open.
-func Play(song string) (*StatusResult, error) {
+func Play(song string) (*Result, error) {
 	if session == nil {
 		return nil, errors.New("Not connected")
 	}
@@ -76,7 +76,7 @@ func Play(song string) (*StatusResult, error) {
 	dataFormat := `oauth=%s&csrf=%s&uri=%s&context=%v}`
 	data := fmt.Sprintf(dataFormat, session.OAuth, session.CSRF, song, song)
 
-	result := &StatusResult{}
+	result := &Result{}
 
 	request := gorequest.New()
 	_, _, errors := request.Get(getURL(fmt.Sprintf("/remote/play.json?%s", data))).
@@ -92,7 +92,7 @@ func Play(song string) (*StatusResult, error) {
 }
 
 // Pause plays a song in the local spotify, provided it's open.
-func Pause() (*StatusResult, error) {
+func Pause() (*Result, error) {
 	if session == nil {
 		return nil, errors.New("Not connected")
 	}
@@ -100,7 +100,7 @@ func Pause() (*StatusResult, error) {
 	dataFormat := `oauth=%s&csrf=%s&pause=true`
 	data := fmt.Sprintf(dataFormat, session.OAuth, session.CSRF)
 
-	result := &StatusResult{}
+	result := &Result{}
 
 	request := gorequest.New()
 	_, _, errors := request.Get(getURL(fmt.Sprintf("/remote/pause.json?%s", data))).
