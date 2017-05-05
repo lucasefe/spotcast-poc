@@ -168,7 +168,19 @@ func getResult(path string, params *url.Values) (*Result, error) {
 		return nil, fmt.Errorf("Error getting %s => %+v", path, errors)
 	}
 
+	if err := errorOnResult(result); err != nil {
+		return nil, fmt.Errorf("Error getting %s => %+v", path, err)
+	}
+
 	return result, nil
+}
+
+func errorOnResult(result *Result) error {
+	if result.Error.Type != "" {
+		return fmt.Errorf("Type: %s Message: %s", result.Error.Type, result.Error.Message)
+	}
+
+	return nil
 }
 
 func getURL(path string) string {

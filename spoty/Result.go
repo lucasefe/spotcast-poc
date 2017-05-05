@@ -10,6 +10,11 @@ type Result struct {
 	Shuffle bool `json:"shuffle"`
 	Repeat  bool `json:"repeat"`
 
+	Error struct {
+		Type    string `json:"type"`
+		Message string `json:"message"`
+	}
+
 	Track struct {
 		TrackResource struct {
 			Name     string `json:"name"`
