@@ -11,7 +11,7 @@ import (
 const defaultSong = "spotify:album:6eWtdQm0hSlTgpkbw4LaBG"
 
 func main() {
-	spoty.EnableVerbose()
+	// spoty.EnableVerbose()
 	spoty.Connect()
 
 	if len(os.Args) == 1 {
@@ -29,7 +29,9 @@ func main() {
 		if err != nil {
 			panic(fmt.Sprintf("Could not play song: %+v\n", err))
 		}
-		fmt.Printf("Status: %+v", result)
+
+		printPlaying(result)
+
 	case "pause":
 		result, err := spoty.Pause()
 		if err != nil {
@@ -48,4 +50,12 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
+}
+
+func printPlaying(result *spoty.Result) {
+	artist := result.Track.ArtistResource.Name
+	album := result.Track.AlbumResource.Name
+	song := result.Track.TrackResource.Name
+
+	fmt.Printf("Playing: %s - %s - %s", artist, album, song)
 }
