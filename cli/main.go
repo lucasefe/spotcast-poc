@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-// Wrecking..
 const song = "spotify:album:6eWtdQm0hSlTgpkbw4LaBG"
 
 func main() {
