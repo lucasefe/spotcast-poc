@@ -20,17 +20,19 @@ func main() {
 		panic(fmt.Sprintf("Could not get status: %+v\n", err))
 	}
 
-	fmt.Printf("Status: %+v\n", result)
-
-	_, err = spoty.Play(song)
+	result, err = spoty.Play(song)
 	if err != nil {
 		panic(fmt.Sprintf("Could not play song: %+v\n", err))
 	}
+
+	fmt.Printf("Status: %+v\n", result)
 
 	result, err = spoty.Status()
 	if err != nil {
 		panic(fmt.Sprintf("Could not get status: %+v\n", err))
 	}
+
+	fmt.Printf("Status: %+v\n", result)
 
 	time.Sleep(15 * time.Second)
 

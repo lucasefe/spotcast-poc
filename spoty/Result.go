@@ -1,6 +1,6 @@
 package spoty
 
-// StatusResult represent the result of a status call
+// Result represent the result of a status call
 type Result struct {
 	ClientVersion string `json:"client_version"`
 	Version       int    `json:"version"`

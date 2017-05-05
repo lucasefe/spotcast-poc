@@ -3,6 +3,7 @@ package spoty
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/parnurzeal/gorequest"
@@ -16,8 +17,8 @@ const (
 
 // Session is the session data
 type Session struct {
-	CSRF  string
-	OAuth string
+	CSRFToken  string
+	OAuthToken string
 }
 
 var session *Session
@@ -30,7 +31,7 @@ func Connect() error {
 
 	oauthToken, err := getOauthToken()
 	if err != nil {
-		return fmt.Errorf("Could not get oauthToken: %+v", err)
+		return fmt.Errorf("Could not get OAuthToken: %+v", err)
 	}
 
 	csfrToken, err := getCSRFToken()
@@ -38,8 +39,9 @@ func Connect() error {
 		return fmt.Errorf("Could not get CSRFToken: %+v", err)
 	}
 
-	session = &Session{CSRF: csfrToken, OAuth: oauthToken}
+	session = &Session{CSRFToken: csfrToken, OAuthToken: oauthToken}
 
+	fmt.Printf("Session: %+v\n", session)
 	return nil
 }
 
@@ -49,19 +51,13 @@ func Status() (*Result, error) {
 		return nil, errors.New("Not connected")
 	}
 
-	dataFormat := `oauth=%s&csrf=%s&returnafter=1&returnon=%v}`
-	data := fmt.Sprintf(dataFormat, session.OAuth, session.CSRF, strings.Join(defaultReturnOn, ","))
+	params := getAuthParams(session)
+	params.Set("returnafter", "1")
+	params.Set("returnon", strings.Join(defaultReturnOn, ","))
 
-	result := &Result{}
-
-	request := gorequest.New()
-	_, _, errors := request.Get(getURL(fmt.Sprintf("/remote/status.json?%s", data))).
-		Set("Origin", openSpotifyURL).
-		Send(data).
-		EndStruct(result)
-
-	if len(errors) > 0 {
-		return nil, fmt.Errorf("Can't fetch status: %+v", errors)
+	result, err := getResult("/remote/status.json", params)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
@@ -73,19 +69,13 @@ func Play(song string) (*Result, error) {
 		return nil, errors.New("Not connected")
 	}
 
-	dataFormat := `oauth=%s&csrf=%s&uri=%s&context=%v}`
-	data := fmt.Sprintf(dataFormat, session.OAuth, session.CSRF, song, song)
+	params := getAuthParams(session)
+	params.Set("context", song)
+	params.Set("uri", song)
 
-	result := &Result{}
-
-	request := gorequest.New()
-	_, _, errors := request.Get(getURL(fmt.Sprintf("/remote/play.json?%s", data))).
-		Set("Origin", openSpotifyURL).
-		Send(data).
-		EndStruct(result)
-
-	if len(errors) > 0 {
-		return nil, fmt.Errorf("Can't fetch status: %+v", errors)
+	result, err := getResult("/remote/play.json", params)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
@@ -97,19 +87,12 @@ func Pause() (*Result, error) {
 		return nil, errors.New("Not connected")
 	}
 
-	dataFormat := `oauth=%s&csrf=%s&pause=true`
-	data := fmt.Sprintf(dataFormat, session.OAuth, session.CSRF)
+	params := getAuthParams(session)
+	params.Set("pause", "true")
 
-	result := &Result{}
-
-	request := gorequest.New()
-	_, _, errors := request.Get(getURL(fmt.Sprintf("/remote/pause.json?%s", data))).
-		Set("Origin", openSpotifyURL).
-		Send(data).
-		EndStruct(result)
-
-	if len(errors) > 0 {
-		return nil, fmt.Errorf("Can't fetch status: %+v", errors)
+	result, err := getResult("/remote/pause.json", params)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
@@ -117,34 +100,57 @@ func Pause() (*Result, error) {
 
 // Private stuff
 func getOauthToken() (string, error) {
-	oauthToken := struct {
+	data := struct {
 		Token string `json:"t"`
 	}{}
 
 	request := gorequest.New()
-	_, _, errs := request.Get(fmt.Sprintf("%s/token", openSpotifyURL)).EndStruct(&oauthToken)
+	_, _, errs := request.Get(fmt.Sprintf("%s/token", openSpotifyURL)).EndStruct(&data)
 	if len(errs) > 0 {
 		return "", fmt.Errorf("Can't fetch csrf status: %+v", errs)
 	}
 
-	return oauthToken.Token, nil
+	return data.Token, nil
 }
 
 func getCSRFToken() (string, error) {
-	authToken := struct {
+	data := struct {
 		Token string `json:"token"`
 	}{}
 
 	request := gorequest.New()
 	_, _, errs := request.Get(getURL("/simplecsrf/token.json")).
 		Set("Origin", openSpotifyURL).
-		EndStruct(&authToken)
+		EndStruct(&data)
 
 	if len(errs) > 0 {
 		return "", fmt.Errorf("Can't fetch csrf status: %+v", errs)
 	}
 
-	return authToken.Token, nil
+	return data.Token, nil
+}
+
+func getAuthParams(session *Session) *url.Values {
+	v := &url.Values{}
+	v.Set("oauth", session.OAuthToken)
+	v.Set("csrf", session.CSRFToken)
+
+	return v
+}
+
+func getResult(path string, params *url.Values) (*Result, error) {
+	result := &Result{}
+	request := gorequest.New()
+	_, _, errors := request.Get(getURL(path)).
+		Set("Origin", openSpotifyURL).
+		Query(params.Encode()).
+		EndStruct(result)
+
+	if len(errors) > 0 {
+		return nil, fmt.Errorf("Error getting %s => %+v", path, errors)
+	}
+
+	return result, nil
 }
 
 func getURL(path string) string {
@@ -153,5 +159,5 @@ func getURL(path string) string {
 
 // TODO: It needs to be dynamic.
 func generateLocalHostname() string {
-	return "lucasefe.spotilocal.com"
+	return "lucassa1fe.spotilocal.com"
 }
