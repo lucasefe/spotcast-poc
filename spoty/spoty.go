@@ -4,9 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/parnurzeal/gorequest"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 var defaultReturnOn = []string{"login", "logout", "play", "pause", "error", "ap"}
@@ -15,6 +18,8 @@ const (
 	openSpotifyURL = "https://open.spotify.com"
 )
 
+var log = logrus.New()
+
 // Session is the session data
 type Session struct {
 	CSRFToken  string
@@ -22,6 +27,17 @@ type Session struct {
 }
 
 var session *Session
+
+func init() {
+	log.Out = os.Stdout
+	log.Level = logrus.WarnLevel
+	log.Formatter = new(prefixed.TextFormatter)
+}
+
+// EnableVerbose enables verbose level on the logger
+func EnableVerbose() {
+	log.Level = logrus.DebugLevel
+}
 
 // Connect connects to the local server and gets session data
 func Connect() error {
@@ -41,7 +57,7 @@ func Connect() error {
 
 	session = &Session{CSRFToken: csfrToken, OAuthToken: oauthToken}
 
-	fmt.Printf("Session: %+v\n", session)
+	log.Debugf("Session: %+v\n", session)
 	return nil
 }
 
@@ -139,6 +155,8 @@ func getAuthParams(session *Session) *url.Values {
 }
 
 func getResult(path string, params *url.Values) (*Result, error) {
+	log.Debugf("Requesting Path: %s Params: %s", path, params.Encode())
+
 	result := &Result{}
 	request := gorequest.New()
 	_, _, errors := request.Get(getURL(path)).

@@ -1,38 +1,36 @@
 package main
 
 import (
-	"github.com/lucasefe/spotcast/spoty"
-
 	"fmt"
 	"time"
+
+	"bitbucket.org/lucasefe/spotcast/spoty"
 )
 
 const song = "spotify:album:6eWtdQm0hSlTgpkbw4LaBG"
 
 func main() {
+	spoty.EnableVerbose()
+
 	err := spoty.Connect()
 	if err != nil {
 		panic(fmt.Sprintf("Could not Connect: %+v\n", err))
 	}
 
-	result, err := spoty.Status()
+	_, err = spoty.Status()
 	if err != nil {
 		panic(fmt.Sprintf("Could not get status: %+v\n", err))
 	}
 
-	result, err = spoty.Play(song)
+	_, err = spoty.Play(song)
 	if err != nil {
 		panic(fmt.Sprintf("Could not play song: %+v\n", err))
 	}
 
-	fmt.Printf("Status: %+v\n", result)
-
-	result, err = spoty.Status()
+	_, err = spoty.Status()
 	if err != nil {
 		panic(fmt.Sprintf("Could not get status: %+v\n", err))
 	}
-
-	fmt.Printf("Status: %+v\n", result)
 
 	time.Sleep(15 * time.Second)
 
@@ -40,6 +38,4 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("Could not pause song: %+v\n", err))
 	}
-
-	fmt.Printf("Status: %+v\n", result)
 }
