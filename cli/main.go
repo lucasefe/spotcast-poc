@@ -36,7 +36,15 @@ func main() {
 	case "pause":
 		result, err := spoty.Pause()
 		if err != nil {
-			fmt.Printf("Could not get status: %+v\n", err)
+			fmt.Printf("Could not pause: %+v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Status: %+v", result)
+	case "resume":
+		result, err := spoty.Resume()
+		if err != nil {
+			fmt.Printf("Could not resume: %+v\n", err)
 			os.Exit(1)
 		}
 

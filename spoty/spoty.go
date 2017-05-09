@@ -26,7 +26,9 @@ type Session struct {
 	OAuthToken string
 }
 
-var session *Session
+var (
+	session *Session
+)
 
 func init() {
 	log.Out = os.Stdout
@@ -105,6 +107,23 @@ func Pause() (*Result, error) {
 
 	params := getAuthParams(session)
 	params.Set("pause", "true")
+
+	result, err := getResult("/remote/pause.json", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// Resume plays a song in the local spotify, provided it's open.
+func Resume() (*Result, error) {
+	if session == nil {
+		return nil, errors.New("Not connected")
+	}
+
+	params := getAuthParams(session)
+	params.Set("pause", "false")
 
 	result, err := getResult("/remote/pause.json", params)
 	if err != nil {
