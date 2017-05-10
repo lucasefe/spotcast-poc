@@ -6,18 +6,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/julienschmidt/httprouter"
 )
 
 var (
 	addr = flag.String("addr", "localhost:8081", "http service address")
-	conn *websocket.Conn
+
+	channel *Channel
 )
 
 func main() {
@@ -26,7 +25,14 @@ func main() {
 
 	closeWebsocket := make(chan bool)
 	defer close(closeWebsocket)
-	go connect(closeWebsocket)
+
+	c, err := NewChannel(*addr)
+	if err != nil {
+		log.Fatalf("Could not create channel: %v", err)
+	}
+	channel = c
+	go channel.Connect(closeWebsocket)
+	defer channel.Close()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
@@ -36,11 +42,18 @@ func main() {
 
 	srv := startHTTPServer(router)
 
-	select {
-	case <-interrupt:
-		ctx := context.Background()
-		srv.Shutdown(ctx)
-		closeWebsocket <- true
+away:
+	for {
+		select {
+		case message := <-channel.Receive:
+			log.Printf("Got %s\n", message)
+			break
+
+		case <-interrupt:
+			srv.Shutdown(context.Background())
+			closeWebsocket <- true
+			break away
+		}
 	}
 
 	<-time.After(time.Second)
@@ -60,54 +73,6 @@ func startHTTPServer(router *httprouter.Router) *http.Server {
 }
 
 func echo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	err := conn.WriteMessage(websocket.TextMessage, []byte("Echo!"))
-	if err != nil {
-		log.Println("write:", err)
-		return
-	}
+	channel.Send("Echo!")
 	fmt.Fprint(w, "Echo sent")
-}
-
-func connect(stop chan bool) {
-	u := url.URL{Scheme: "ws", Host: *addr, Path: "/ws"}
-	log.Printf("connecting to %s", u.String())
-
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-	conn = c
-	if err != nil {
-		log.Fatal("dial:", err)
-	}
-	defer conn.Close()
-
-	done := make(chan struct{})
-
-	go func() {
-		defer conn.Close()
-		defer close(done)
-		for {
-			_, message, err := conn.ReadMessage()
-			if err != nil {
-				log.Println("read:", err)
-				return
-			}
-			log.Printf("recv: %s", message)
-		}
-	}()
-
-loop:
-	for {
-		select {
-		case <-stop:
-			err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			if err != nil {
-				log.Println("write close:", err)
-			}
-			select {
-			case <-done:
-			case <-time.After(time.Second):
-			}
-			conn.Close()
-			break loop
-		}
-	}
 }
