@@ -49,6 +49,7 @@ func (c *Channel) Connect(stop chan bool) {
 				return
 			}
 
+			log.Printf("Receiving action: %+v", string(message))
 			c.Receive <- string(message)
 		}
 	}()
@@ -72,8 +73,9 @@ loop:
 }
 
 // Send sends a text message through the active websocket connection
-func (c *Channel) Send(text string) {
-	err := c.conn.WriteMessage(websocket.TextMessage, []byte(text))
+func (c *Channel) Send(text []byte) {
+	log.Printf("Sending action: %+v", string(text))
+	err := c.conn.WriteMessage(websocket.TextMessage, text)
 	if err != nil {
 		log.Println("write:", err)
 		return

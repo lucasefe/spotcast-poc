@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -9,6 +10,8 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"gitlab.com/lucasefe/spotcast/spoty"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -39,6 +42,7 @@ func main() {
 
 	router := httprouter.New()
 	router.POST("/", echo)
+	router.POST("/play", play)
 
 	srv := startHTTPServer(router)
 
@@ -46,7 +50,20 @@ away:
 	for {
 		select {
 		case message := <-channel.Receive:
-			log.Printf("Got %s\n", message)
+
+			action, err := parseAction(message)
+			if err != nil {
+				log.Printf("Could not parse message %+v. Got error: %s", message, err)
+			}
+
+			switch action.Type {
+			case "PLAY_SONG":
+				playSong(action.Data)
+				break
+			default:
+				log.Printf("Don't know what this means: %+v", message)
+			}
+
 			break
 
 		case <-interrupt:
@@ -57,6 +74,22 @@ away:
 	}
 
 	<-time.After(time.Second)
+}
+
+func parseAction(message string) (*Action, error) {
+	action := &Action{}
+
+	if err := json.Unmarshal([]byte(message), &action); err != nil {
+		return nil, err
+	}
+
+	return action, nil
+}
+
+// Action ..
+type Action struct {
+	Type string            `json:"type"`
+	Data map[string]string `json:"data"`
 }
 
 func startHTTPServer(router *httprouter.Router) *http.Server {
@@ -72,7 +105,48 @@ func startHTTPServer(router *httprouter.Router) *http.Server {
 	return srv
 }
 
+func play(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	message, err := playSongAction()
+	if err != nil {
+		http.Error(w, "Error", 500) // Or Redirect?
+		log.Printf("Error playing song error: %s", err)
+	}
+
+	channel.Send(message)
+	fmt.Fprint(w, "Play sent")
+}
+
+func newPlayAction(songURI string) *Action {
+	return &Action{
+		Type: "PLAY_SONG",
+		Data: map[string]string{"song": songURI},
+	}
+}
+
+func playSong(data map[string]string) {
+	spoty.Connect()
+
+	if song, ok := data["song"]; ok {
+		spoty.Play(song)
+		return
+	}
+
+	log.Printf("Wrong data: %+v", data)
+}
+
+func playSongAction() ([]byte, error) {
+	action := newPlayAction("spotify:artist:08td7MxkoHQkXnWAYD8d6Q")
+
+	message, err := json.Marshal(action)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return message, nil
+}
+
 func echo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	channel.Send("Echo!")
+	channel.Send([]byte("Echo!"))
 	fmt.Fprint(w, "Echo sent")
 }
