@@ -51,6 +51,8 @@ func main() {
 
 	router := httprouter.New()
 	router.POST("/play/:songURI", play)
+	router.POST("/pause", pause)
+	router.POST("/stop", pause)
 
 	srv := startHTTPServer(router)
 
@@ -80,6 +82,9 @@ func handleAction(message string) {
 	switch action.Type {
 	case "PLAY_SONG":
 		playSong(action.Data)
+		break
+	case "STOP", "PAUSE":
+		player.Pause()
 		break
 	default:
 		log.Printf("Don't know what this means: %+v", message)
@@ -120,11 +125,22 @@ func play(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	message, err := playSongAction(songURI)
 	if err != nil {
 		http.Error(w, "Error", 500) // Or Redirect?
-		log.Printf("Error playing song error: %s", err)
+		log.Printf("Error attempting to send play. Error: %s", err)
 	}
 
 	channel.Send(message)
-	fmt.Fprint(w, "Play sent")
+	fmt.Fprint(w, fmt.Sprintf("Requesting play of song: %+v\n", songURI))
+}
+
+func pause(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	message, err := pauseAction()
+	if err != nil {
+		http.Error(w, "Error", 500) // Or Redirect?
+		log.Printf("Error attempting to send pause. Error: %s", err)
+	}
+
+	channel.Send(message)
+	fmt.Fprint(w, "Requesting pause")
 }
 
 func newPlayAction(songURI string) *Action {
@@ -141,6 +157,20 @@ func playSong(data map[string]string) {
 	}
 
 	log.Printf("Wrong data: %+v", data)
+}
+
+func pauseAction() ([]byte, error) {
+	action := &Action{
+		Type: "PAUSE",
+	}
+
+	message, err := json.Marshal(action)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return message, nil
 }
 
 func playSongAction(song string) ([]byte, error) {
