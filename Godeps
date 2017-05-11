@@ -1,4 +1,6 @@
 github.com/gorilla/websocket a91eba7f97777409bc2c443f5534d41dd20c5720
+github.com/julienschmidt/httprouter 975b5c4c7c21c0e3d2764200bf2aa8e34657ae6e
+github.com/labstack/gommon/... 1121fd3e243c202482226a7afe4dcd07ffc4139a
 github.com/mattn/go-colorable ded68f7a9561c023e790de24279db7ebf473ea80
 github.com/mattn/go-isatty 30a891c33c7cde7b02a981314b4228ec99380cca
 github.com/mgutz/ansi 9520e82c474b0a04dd04f8a40959027271bab992
@@ -8,6 +10,3 @@ github.com/Sirupsen/logrus ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 github.com/x-cray/logrus-prefixed-formatter b310cb7c71b59393c2d82e6ccfb42cc6eceda902
 golang.org/x/net/... 236b8f043b920452504e263bc21d354427127473
 golang.org/x/sys/... 7a6e5648d140666db5d920909e082ca00a87ba2c
-
-github.com/labstack/gommon/... master
-github.com/julienschmidt/httprouter master
