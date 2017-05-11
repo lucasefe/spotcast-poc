@@ -1,7 +1,8 @@
 bin
 pkg
 vendor
-cli/cli
-server/server
-client/client
+src/cli/cli
+src/server/server
+src/client/client
 
+.dependencies

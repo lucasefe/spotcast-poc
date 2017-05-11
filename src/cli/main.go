@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"gitlab.com/lucasefe/spotcast/spoty"
+	"spoty"
 )
 
 const defaultSong = "spotify:album:6eWtdQm0hSlTgpkbw4LaBG"

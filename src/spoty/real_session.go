@@ -5,10 +5,11 @@ import (
 	"net/url"
 	"strings"
 
+	"util"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/labstack/gommon/log"
 	"github.com/parnurzeal/gorequest"
-	"gitlab.com/lucasefe/spotcast/util"
 )
 
 const openSpotifyURL = "https://open.spotify.com"

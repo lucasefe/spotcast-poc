@@ -1,5 +1,0 @@
-package: .
-import:
-- package: github.com/parnurzeal/gorequest
-- package: github.com/x-cray/logrus-prefixed-formatter
-- package: github.com/gorilla/websocket
