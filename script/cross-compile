@@ -6,7 +6,7 @@ while read os arch; do
   mkdir -p "$build_dir"
   echo "Compiling for $os/$arch"
 
-  GOOS=$os GOARCH=$arch go build -o "$build_dir"/$1 $1/*.go    &&
+  GOOS=$os GOARCH=$arch go build -o "$build_dir"/$1 src/$1/*.go    &&
     cd pkg && tar -zcvf "$identifier".tar.gz "$identifier"     &&
     rm -rf "$identifier" && cd ..
 done << EOF
