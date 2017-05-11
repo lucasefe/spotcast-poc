@@ -62,39 +62,40 @@ func main() {
 	signal.Notify(interrupt, os.Interrupt)
 
 	router := httprouter.New()
-	router.POST("/", echo)
 	router.POST("/play", play)
 
 	srv := startHTTPServer(router)
 
-away:
+mainLoop:
 	for {
 		select {
 		case message := <-channel.Receive:
-
-			action, err := parseAction(message)
-			if err != nil {
-				log.Printf("Could not parse message %+v. Got error: %s", message, err)
-			}
-
-			switch action.Type {
-			case "PLAY_SONG":
-				playSong(action.Data)
-				break
-			default:
-				log.Printf("Don't know what this means: %+v", message)
-			}
-
+			handleAction(message)
 			break
 
 		case <-interrupt:
 			srv.Shutdown(context.Background())
 			closeWebsocket <- true
-			break away
+			break mainLoop
 		}
 	}
 
 	<-time.After(time.Second)
+}
+
+func handleAction(message string) {
+	action, err := parseAction(message)
+	if err != nil {
+		log.Printf("Could not parse message %+v. Got error: %s", message, err)
+	}
+
+	switch action.Type {
+	case "PLAY_SONG":
+		playSong(action.Data)
+		break
+	default:
+		log.Printf("Don't know what this means: %+v", message)
+	}
 }
 
 func parseAction(message string) (*Action, error) {
@@ -163,9 +164,4 @@ func playSongAction() ([]byte, error) {
 	}
 
 	return message, nil
-}
-
-func echo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	channel.Send([]byte("Echo!"))
-	fmt.Fprint(w, "Echo sent")
 }
