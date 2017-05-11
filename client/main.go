@@ -76,9 +76,10 @@ func playerPoller() {
 			log.Fatal(err)
 		}
 
-		if lastResult.CurrentSongURI() != result.CurrentSongURI() {
+		if lastResult != nil || (lastResult.Track.CurrentSongURI() != result.Track.CurrentSongURI()) {
 			lastResult = result
-			log.Printf("Now Playing %+s, %+v\n", lastResult.CurrentSongTitle(), lastResult.CurrentSongURI())
+			track := result.Track
+			log.Printf("Now Playing %+s, %+v\n", track.CurrentSongTitle(), track.CurrentSongURI())
 		}
 	}
 }
