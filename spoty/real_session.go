@@ -1,75 +1,65 @@
 package spoty
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"os"
 	"strings"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/labstack/gommon/log"
 	"github.com/parnurzeal/gorequest"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
+const openSpotifyURL = "https://open.spotify.com"
+
 var defaultReturnOn = []string{"login", "logout", "play", "pause", "error", "ap"}
 
-const (
-	openSpotifyURL = "https://open.spotify.com"
-)
-
-var log = logrus.New()
-
-// Session is the session data
-type Session struct {
+// RealSession is the session data
+type RealSession struct {
 	CSRFToken  string
 	OAuthToken string
+
+	log *logrus.Logger
 }
 
-var (
-	session *Session
-)
-
-func init() {
+// NewSession creates a new Real Session
+func NewSession() (*RealSession, error) {
+	log := logrus.New()
 	log.Out = os.Stdout
 	log.Level = logrus.WarnLevel
 	log.Formatter = new(prefixed.TextFormatter)
-}
-
-// EnableVerbose enables verbose level on the logger
-func EnableVerbose() {
-	log.Level = logrus.DebugLevel
-}
-
-// Connect connects to the local server and gets session data
-func Connect() error {
-	if session != nil {
-		return errors.New("Session already created.")
-	}
 
 	oauthToken, err := getOauthToken()
 	if err != nil {
-		return fmt.Errorf("Could not get OAuthToken: %+v", err)
+		return nil, fmt.Errorf("Could not get OAuthToken: %+v", err)
 	}
 
 	csfrToken, err := getCSRFToken()
 	if err != nil {
-		return fmt.Errorf("Could not get CSRFToken: %+v", err)
+		return nil, fmt.Errorf("Could not get CSRFToken: %+v", err)
 	}
 
-	session = &Session{CSRFToken: csfrToken, OAuthToken: oauthToken}
+	session := &RealSession{
+		CSRFToken:  csfrToken,
+		OAuthToken: oauthToken,
+		log:        log,
+	}
 
 	log.Debugf("Session: %+v\n", session)
-	return nil
+
+	return session, nil
+}
+
+// SetVerbose enables verbose level on the logger
+func (s *RealSession) SetVerbose() {
+	s.log.Level = logrus.DebugLevel
 }
 
 // Status fetches the current status
-func Status() (*Result, error) {
-	if session == nil {
-		return nil, errors.New("Not connected")
-	}
-
-	params := getAuthParams(session)
+func (s *RealSession) Status() (*Result, error) {
+	params := getAuthParams(s)
 	params.Set("returnafter", "1")
 	params.Set("returnon", strings.Join(defaultReturnOn, ","))
 
@@ -82,12 +72,8 @@ func Status() (*Result, error) {
 }
 
 // Play plays a song in the local spotify, provided it's open.
-func Play(song string) (*Result, error) {
-	if session == nil {
-		return nil, errors.New("Not connected")
-	}
-
-	params := getAuthParams(session)
+func (s *RealSession) Play(song string) (*Result, error) {
+	params := getAuthParams(s)
 	params.Set("context", song)
 	params.Set("uri", song)
 
@@ -100,12 +86,8 @@ func Play(song string) (*Result, error) {
 }
 
 // Pause plays a song in the local spotify, provided it's open.
-func Pause() (*Result, error) {
-	if session == nil {
-		return nil, errors.New("Not connected")
-	}
-
-	params := getAuthParams(session)
+func (s *RealSession) Pause() (*Result, error) {
+	params := getAuthParams(s)
 	params.Set("pause", "true")
 
 	result, err := getResult("/remote/pause.json", params)
@@ -117,12 +99,8 @@ func Pause() (*Result, error) {
 }
 
 // Resume plays a song in the local spotify, provided it's open.
-func Resume() (*Result, error) {
-	if session == nil {
-		return nil, errors.New("Not connected")
-	}
-
-	params := getAuthParams(session)
+func (s *RealSession) Resume() (*Result, error) {
+	params := getAuthParams(s)
 	params.Set("pause", "false")
 
 	result, err := getResult("/remote/pause.json", params)
@@ -165,7 +143,7 @@ func getCSRFToken() (string, error) {
 	return data.Token, nil
 }
 
-func getAuthParams(session *Session) *url.Values {
+func getAuthParams(session *RealSession) *url.Values {
 	v := &url.Values{}
 	v.Set("oauth", session.OAuthToken)
 	v.Set("csrf", session.CSRFToken)

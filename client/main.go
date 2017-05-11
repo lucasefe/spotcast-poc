@@ -11,28 +11,49 @@ import (
 	"os/signal"
 	"time"
 
-	"gitlab.com/lucasefe/spotcast/spoty"
-
 	"github.com/julienschmidt/httprouter"
+	"gitlab.com/lucasefe/spotcast/spoty"
 )
 
 var (
-	addr = flag.String("addr", "localhost:8081", "http service address")
+	serverAddress = flag.String("remote", "localhost:8081", "remote server host:port")
+	verbose       = flag.Bool("verbose", false, "enable verbose mode")
+	devmode       = flag.Bool("dev", false, "enable dev mode")
 
 	channel *Channel
+	player  spoty.Session
 )
 
+func getSession(faked bool) spoty.Session {
+	if faked {
+		return &spoty.FakedSession{}
+	}
+
+	player, err := spoty.NewSession()
+	if err != nil {
+		panic(err)
+	}
+
+	return player
+}
 func main() {
 	flag.Parse()
 	log.SetFlags(0)
 
+	player = getSession(*devmode)
+
+	if *verbose || *devmode {
+		player.SetVerbose()
+	}
+
 	closeWebsocket := make(chan bool)
 	defer close(closeWebsocket)
 
-	c, err := NewChannel(*addr)
+	c, err := NewChannel(*serverAddress)
 	if err != nil {
 		log.Fatalf("Could not create channel: %v", err)
 	}
+
 	channel = c
 	go channel.Connect(closeWebsocket)
 	defer channel.Close()
@@ -124,10 +145,8 @@ func newPlayAction(songURI string) *Action {
 }
 
 func playSong(data map[string]string) {
-	spoty.Connect()
-
 	if song, ok := data["song"]; ok {
-		spoty.Play(song)
+		player.Play(song)
 		return
 	}
 

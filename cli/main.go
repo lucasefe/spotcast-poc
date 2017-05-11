@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"os"
 
-	"bitbucket.org/lucasefe/spotcast/spoty"
+	"gitlab.com/lucasefe/spotcast/spoty"
 )
 
 const defaultSong = "spotify:album:6eWtdQm0hSlTgpkbw4LaBG"
 
+var session spoty.Session
+
 func main() {
-	spoty.EnableVerbose()
-	spoty.Connect()
+	session, _ = spoty.NewSession()
+	session.SetVerbose()
 
 	if len(os.Args) == 1 {
 		fmt.Println("Not enough arguments")
@@ -25,7 +27,7 @@ func main() {
 		if len(os.Args) > 2 {
 			song = os.Args[2]
 		}
-		result, err := spoty.Play(song)
+		result, err := session.Play(song)
 		if err != nil {
 			fmt.Printf("Could not play song: %+v\n", err)
 			os.Exit(1)
@@ -34,7 +36,7 @@ func main() {
 		printPlaying(result)
 
 	case "pause":
-		result, err := spoty.Pause()
+		result, err := session.Pause()
 		if err != nil {
 			fmt.Printf("Could not pause: %+v\n", err)
 			os.Exit(1)
@@ -42,7 +44,7 @@ func main() {
 
 		fmt.Printf("Status: %+v", result)
 	case "resume":
-		result, err := spoty.Resume()
+		result, err := session.Resume()
 		if err != nil {
 			fmt.Printf("Could not resume: %+v\n", err)
 			os.Exit(1)
@@ -50,7 +52,7 @@ func main() {
 
 		fmt.Printf("Status: %+v", result)
 	case "status":
-		result, err := spoty.Status()
+		result, err := session.Status()
 		if err != nil {
 			fmt.Printf("Could not get status: %+v\n", err)
 			os.Exit(1)
