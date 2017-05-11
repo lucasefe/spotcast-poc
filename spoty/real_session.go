@@ -18,10 +18,9 @@ var defaultReturnOn = []string{"login", "logout", "play", "pause", "error", "ap"
 
 // RealSession is the session data
 type RealSession struct {
-	CSRFToken  string
-	OAuthToken string
-
-	log *logrus.Logger
+	csrfToken  string
+	oauthToken string
+	log        *logrus.Logger
 }
 
 // NewSession creates a new Real Session
@@ -31,19 +30,19 @@ func NewSession() (*RealSession, error) {
 	log.Level = logrus.WarnLevel
 	log.Formatter = new(prefixed.TextFormatter)
 
-	oauthToken, err := getOauthToken()
+	oauthToken, err := getoauthToken()
 	if err != nil {
-		return nil, fmt.Errorf("Could not get OAuthToken: %+v", err)
+		return nil, fmt.Errorf("Could not get oauthToken: %+v", err)
 	}
 
-	csfrToken, err := getCSRFToken()
+	csfrToken, err := getcsrfToken()
 	if err != nil {
-		return nil, fmt.Errorf("Could not get CSRFToken: %+v", err)
+		return nil, fmt.Errorf("Could not get csrfToken: %+v", err)
 	}
 
 	session := &RealSession{
-		CSRFToken:  csfrToken,
-		OAuthToken: oauthToken,
+		csrfToken:  csfrToken,
+		oauthToken: oauthToken,
 		log:        log,
 	}
 
@@ -112,7 +111,7 @@ func (s *RealSession) Resume() (*Result, error) {
 }
 
 // Private stuff
-func getOauthToken() (string, error) {
+func getoauthToken() (string, error) {
 	data := struct {
 		Token string `json:"t"`
 	}{}
@@ -126,7 +125,7 @@ func getOauthToken() (string, error) {
 	return data.Token, nil
 }
 
-func getCSRFToken() (string, error) {
+func getcsrfToken() (string, error) {
 	data := struct {
 		Token string `json:"token"`
 	}{}
@@ -145,8 +144,8 @@ func getCSRFToken() (string, error) {
 
 func getAuthParams(session *RealSession) *url.Values {
 	v := &url.Values{}
-	v.Set("oauth", session.OAuthToken)
-	v.Set("csrf", session.CSRFToken)
+	v.Set("oauth", session.oauthToken)
+	v.Set("csrf", session.csrfToken)
 
 	return v
 }
