@@ -50,7 +50,7 @@ func main() {
 	signal.Notify(interrupt, os.Interrupt)
 
 	router := httprouter.New()
-	router.POST("/play", play)
+	router.POST("/play/:songURI", play)
 
 	srv := startHTTPServer(router)
 
@@ -116,7 +116,8 @@ func startHTTPServer(router *httprouter.Router) *http.Server {
 }
 
 func play(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	message, err := playSongAction()
+	songURI := ps.ByName("songURI")
+	message, err := playSongAction(songURI)
 	if err != nil {
 		http.Error(w, "Error", 500) // Or Redirect?
 		log.Printf("Error playing song error: %s", err)
@@ -142,9 +143,9 @@ func playSong(data map[string]string) {
 	log.Printf("Wrong data: %+v", data)
 }
 
-func playSongAction() ([]byte, error) {
-	action := newPlayAction("spotify:artist:08td7MxkoHQkXnWAYD8d6Q")
-
+func playSongAction(song string) ([]byte, error) {
+	// action := newPlayAction("spotify:artist:08td7MxkoHQkXnWAYD8d6Q")
+	action := newPlayAction(song)
 	message, err := json.Marshal(action)
 
 	if err != nil {
