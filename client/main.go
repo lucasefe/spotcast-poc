@@ -24,23 +24,11 @@ var (
 	player  spoty.Session
 )
 
-func getSession(faked bool) spoty.Session {
-	if faked {
-		return &spoty.FakedSession{}
-	}
-
-	player, err := spoty.NewSession()
-	if err != nil {
-		panic(err)
-	}
-
-	return player
-}
 func main() {
 	flag.Parse()
 	log.SetFlags(0)
 
-	player = getSession(*devmode)
+	player = getPlayer(*devmode)
 
 	if *verbose || *devmode {
 		player.SetVerbose()
@@ -164,4 +152,17 @@ func playSongAction() ([]byte, error) {
 	}
 
 	return message, nil
+}
+
+func getPlayer(faked bool) spoty.Session {
+	if faked {
+		return &spoty.FakedSession{}
+	}
+
+	player, err := spoty.NewSession()
+	if err != nil {
+		panic(err)
+	}
+
+	return player
 }
