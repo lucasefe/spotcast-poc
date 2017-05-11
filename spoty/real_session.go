@@ -3,13 +3,12 @@ package spoty
 import (
 	"fmt"
 	"net/url"
-	"os"
 	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/labstack/gommon/log"
 	"github.com/parnurzeal/gorequest"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"gitlab.com/lucasefe/spotcast/util"
 )
 
 const openSpotifyURL = "https://open.spotify.com"
@@ -25,10 +24,7 @@ type RealSession struct {
 
 // NewSession creates a new Real Session
 func NewSession() (*RealSession, error) {
-	log := logrus.New()
-	log.Out = os.Stdout
-	log.Level = logrus.WarnLevel
-	log.Formatter = new(prefixed.TextFormatter)
+	log := util.NewLogger()
 
 	oauthToken, err := getoauthToken()
 	if err != nil {

@@ -2,6 +2,7 @@ package spoty
 
 import "fmt"
 
+// Track is a track from a result, and includes artist, album and song data
 type Track struct {
 	TrackResource struct {
 		Name     string `json:"name"`
@@ -26,6 +27,7 @@ type Track struct {
 	} `json:"album_resource"`
 }
 
+// CurrentSongURI returns the URI from the song being played right now on the player
 func (t *Track) CurrentSongURI() string {
 	if t != nil {
 		return t.TrackResource.URI
@@ -34,6 +36,7 @@ func (t *Track) CurrentSongURI() string {
 	return ""
 }
 
+// CurrentSongTitle returns the title from the song being played right now on the player
 func (t *Track) CurrentSongTitle() string {
 	if t != nil {
 		return fmt.Sprintf("%s - %s by %s", t.TrackResource.Name, t.AlbumResource.Name, t.ArtistResource.Name)

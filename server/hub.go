@@ -1,8 +1,10 @@
-// Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package main
+
+import (
+	"github.com/Sirupsen/logrus"
+	"github.com/labstack/gommon/log"
+	"gitlab.com/lucasefe/spotcast/util"
+)
 
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
@@ -18,6 +20,9 @@ type Hub struct {
 
 	// Unregister requests from clients.
 	unregister chan *Client
+
+	// logger
+	log *logrus.Logger
 }
 
 func newHub() *Hub {
@@ -26,6 +31,7 @@ func newHub() *Hub {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
+		log:        util.NewLogger(),
 	}
 }
 
@@ -33,7 +39,9 @@ func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
-			h.clients[client] = true
+			h.addClient(client)
+		case client := <-h.unregister:
+			h.removeClient(client)
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
@@ -50,4 +58,14 @@ func (h *Hub) run() {
 			}
 		}
 	}
+}
+
+func (h *Hub) addClient(client *Client) {
+	h.clients[client] = true
+	log.Debugf("Clients: %d%", len(h.clients))
+}
+
+func (h *Hub) removeClient(client *Client) {
+	delete(h.clients, client)
+	log.Debugf("Clients: %d%", len(h.clients))
 }
