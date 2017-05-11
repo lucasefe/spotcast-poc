@@ -2,16 +2,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
 	"gitlab.com/lucasefe/spotcast/spoty"
 )
 
@@ -49,12 +45,7 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	router := httprouter.New()
-	router.POST("/play/:songURI", play)
-	router.POST("/pause", pause)
-	router.POST("/stop", pause)
-
-	srv := startHTTPServer(router)
+	srv := startHTTPServer()
 
 mainLoop:
 	for {
@@ -73,118 +64,6 @@ mainLoop:
 	<-time.After(time.Second)
 }
 
-func handleAction(message string) {
-	action, err := parseAction(message)
-	if err != nil {
-		log.Printf("Could not parse message %+v. Got error: %s", message, err)
-	}
-
-	switch action.Type {
-	case "PLAY_SONG":
-		playSong(action.Data)
-		break
-	case "STOP", "PAUSE":
-		player.Pause()
-		break
-	default:
-		log.Printf("Don't know what this means: %+v", message)
-	}
-}
-
-func parseAction(message string) (*Action, error) {
-	action := &Action{}
-
-	if err := json.Unmarshal([]byte(message), &action); err != nil {
-		return nil, err
-	}
-
-	return action, nil
-}
-
-// Action ..
-type Action struct {
-	Type string            `json:"type"`
-	Data map[string]string `json:"data"`
-}
-
-func startHTTPServer(router *httprouter.Router) *http.Server {
-	srv := &http.Server{Addr: ":8080"}
-	srv.Handler = router
-
-	go func() {
-		if err := srv.ListenAndServe(); err != nil {
-			log.Printf("Httpserver: ListenAndServe() error: %s", err)
-		}
-	}()
-
-	return srv
-}
-
-func play(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	songURI := ps.ByName("songURI")
-	message, err := playSongAction(songURI)
-	if err != nil {
-		http.Error(w, "Error", 500) // Or Redirect?
-		log.Printf("Error attempting to send play. Error: %s", err)
-	}
-
-	channel.Send(message)
-	fmt.Fprint(w, fmt.Sprintf("Requesting play of song: %+v\n", songURI))
-}
-
-func pause(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	message, err := pauseAction()
-	if err != nil {
-		http.Error(w, "Error", 500) // Or Redirect?
-		log.Printf("Error attempting to send pause. Error: %s", err)
-	}
-
-	channel.Send(message)
-	fmt.Fprint(w, "Requesting pause")
-}
-
-func newPlayAction(songURI string) *Action {
-	return &Action{
-		Type: "PLAY_SONG",
-		Data: map[string]string{"song": songURI},
-	}
-}
-
-func playSong(data map[string]string) {
-	if song, ok := data["song"]; ok {
-		player.Play(song)
-		return
-	}
-
-	log.Printf("Wrong data: %+v", data)
-}
-
-func pauseAction() ([]byte, error) {
-	action := &Action{
-		Type: "PAUSE",
-	}
-
-	message, err := json.Marshal(action)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return message, nil
-}
-
-func playSongAction(song string) ([]byte, error) {
-	// action := newPlayAction("spotify:artist:08td7MxkoHQkXnWAYD8d6Q")
-	action := newPlayAction(song)
-	message, err := json.Marshal(action)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return message, nil
-}
-
 func getPlayer(faked bool) spoty.Session {
 	if faked {
 		return &spoty.FakedSession{}
@@ -196,4 +75,13 @@ func getPlayer(faked bool) spoty.Session {
 	}
 
 	return player
+}
+
+func playSong(data map[string]string) {
+	if song, ok := data["song"]; ok {
+		player.Play(song)
+		return
+	}
+
+	log.Printf("Wrong data: %+v", data)
 }
