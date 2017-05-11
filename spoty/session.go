@@ -11,19 +11,44 @@ type Session interface {
 
 // FakedSession represents a spotify session that does not connect to the local client
 // Useful for dev mode
-type FakedSession struct{}
+type FakedSession struct {
+	lastResult *Result
+}
+
+var fakeTrack = Track{
+	TrackResource:  trackResource{Name: "Fake Track", URI: "spotify:track:0ZfM5XfJTtFPhOxAERRnNY"},
+	AlbumResource:  albumResource{Name: "Fake Album", URI: ""},
+	ArtistResource: artistResource{Name: "Fake Artist", URI: ""},
+}
+
+// NewFakedSession creates a new FakedSession
+func NewFakedSession() *FakedSession {
+	result := &Result{Running: true, Playing: false, Track: fakeTrack}
+	return &FakedSession{lastResult: result}
+}
 
 // Pause implements Session.Pause
-func (*FakedSession) Pause() (*Result, error) { return &Result{}, nil }
+func (f *FakedSession) Pause() (*Result, error) {
+	f.lastResult.Playing = false
+	return f.lastResult, nil
+}
 
 // Play implements Session.Play
-func (*FakedSession) Play(string) (*Result, error) { return &Result{}, nil }
+func (f *FakedSession) Play(string) (*Result, error) {
+	f.lastResult.Playing = true
+	return f.lastResult, nil
+}
 
 // Resume implements Session.Resume
-func (*FakedSession) Resume() (*Result, error) { return &Result{}, nil }
+func (f *FakedSession) Resume() (*Result, error) {
+	f.lastResult.Playing = true
+	return f.lastResult, nil
+}
 
 // Status implements Session.Status
-func (*FakedSession) Status() (*Result, error) { return &Result{}, nil }
+func (f *FakedSession) Status() (*Result, error) {
+	return f.lastResult, nil
+}
 
 // SetVerbose implements Session.SetVerbose
 func (*FakedSession) SetVerbose() {}

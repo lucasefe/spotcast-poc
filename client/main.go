@@ -91,7 +91,7 @@ func playerPoller() {
 
 func getPlayer(faked bool) spoty.Session {
 	if faked {
-		return &spoty.FakedSession{}
+		return spoty.NewFakedSession()
 	}
 
 	player, err := spoty.NewSession()

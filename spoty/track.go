@@ -4,27 +4,32 @@ import "fmt"
 
 // Track is a track from a result, and includes artist, album and song data
 type Track struct {
-	TrackResource struct {
-		Name     string `json:"name"`
-		URI      string `json:"uri"`
-		Location struct {
-			OG string `json:"og"`
-		} `json:"location"`
-	} `json:"track_resource"`
-	ArtistResource struct {
-		Name     string `json:"name"`
-		URI      string `json:"uri"`
-		Location struct {
-			OG string `json:"og"`
-		} `json:"location"`
-	} `json:"artist_resource"`
-	AlbumResource struct {
-		Name     string `json:"name"`
-		URI      string `json:"uri"`
-		Location struct {
-			OG string `json:"og"`
-		} `json:"location"`
-	} `json:"album_resource"`
+	TrackResource  trackResource  `json:"track_resource"`
+	ArtistResource artistResource `json:"artist_resource"`
+	AlbumResource  albumResource  `json:"album_resource"`
+}
+
+type trackResource struct {
+	Name     string `json:"name"`
+	URI      string `json:"uri"`
+	Location struct {
+		OG string `json:"og"`
+	} `json:"location"`
+}
+
+type artistResource struct {
+	Name     string `json:"name"`
+	URI      string `json:"uri"`
+	Location struct {
+		OG string `json:"og"`
+	} `json:"location"`
+}
+type albumResource struct {
+	Name     string `json:"name"`
+	URI      string `json:"uri"`
+	Location struct {
+		OG string `json:"og"`
+	} `json:"location"`
 }
 
 // CurrentSongURI returns the URI from the song being played right now on the player
