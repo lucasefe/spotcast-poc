@@ -26,5 +26,10 @@ It can act as leader or follower.
 
 * learn more about the local webser api
 
+## Build
+
+* Setup environment with `source .env`
+* Install dependencies with [gpm](https://github.com/pote/gpm): `gpm install`
+* Optionally, build with [realize](https://github.com/tockins/realize): `realize run`
 
 All rights reserved to Lucas Florio
