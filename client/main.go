@@ -47,6 +47,8 @@ func main() {
 
 	srv := startHTTPServer()
 
+	go playerPoller()
+
 mainLoop:
 	for {
 		select {
@@ -62,6 +64,23 @@ mainLoop:
 	}
 
 	<-time.After(time.Second)
+}
+
+func playerPoller() {
+	var lastResult *spoty.Result
+
+	for {
+		time.Sleep(time.Second)
+		result, err := player.Status()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if lastResult.CurrentSongURI() != result.CurrentSongURI() {
+			lastResult = result
+			log.Printf("Now Playing %+s, %+v\n", lastResult.CurrentSongTitle(), lastResult.CurrentSongURI())
+		}
+	}
 }
 
 func getPlayer(faked bool) spoty.Session {
