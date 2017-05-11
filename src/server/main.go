@@ -3,8 +3,7 @@ package main
 import (
 	"flag"
 	"net/http"
-
-	"gitlab.com/lucasefe/spotcast/util"
+	"util"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"

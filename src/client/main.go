@@ -8,10 +8,10 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	"spoty"
+	"util"
 
-	"gitlab.com/lucasefe/spotcast/spoty"
-	"gitlab.com/lucasefe/spotcast/util"
+	"github.com/Sirupsen/logrus"
 )
 
 // Role is either follower or leader

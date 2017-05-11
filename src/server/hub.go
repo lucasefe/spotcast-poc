@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"util"
 
 	"github.com/Sirupsen/logrus"
-	"gitlab.com/lucasefe/spotcast/util"
 )
 
 // Hub maintains the set of active clients and broadcasts messages to the

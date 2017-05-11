@@ -10,7 +10,7 @@ settings:
     port: 5001
 projects:
 - name: spotcast-client
-  path: client
+  path: src/client
   fmt: true
   generate: false
   test: false
@@ -31,7 +31,7 @@ projects:
     file_log: false
     file_err: false
 - name: spotcast-cli
-  path: cli
+  path: src/cli
   fmt: true
   generate: false
   test: false
@@ -52,7 +52,7 @@ projects:
     file_log: false
     file_err: false
 - name: spotcast-server
-  path: server
+  path: src/server
   fmt: true
   generate: false
   test: false
@@ -63,8 +63,7 @@ projects:
     preview: false
     paths:
     - /
-    ignore_paths:
-    - vendor
+    ignore_paths: []
     exts:
     - .go
   streams:
