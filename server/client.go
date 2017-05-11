@@ -6,7 +6,6 @@ package main
 
 import (
 	"bytes"
-	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -59,7 +58,7 @@ func (c *Client) readPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				log.Printf("error: %v", err)
+				logger.Warningf("Unexpected Close Error: %v", err)
 			}
 			break
 		}

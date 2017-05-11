@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
-	"log"
 	"net/http"
 
+	"gitlab.com/lucasefe/spotcast/util"
+
+	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 )
 
@@ -13,24 +15,28 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-var addr = flag.String("addr", ":8081", "http service address")
+var (
+	addr   = flag.String("addr", ":8081", "http service address")
+	logger *logrus.Logger
+)
 
 func main() {
 	flag.Parse()
+	logger = util.NewLogger()
+
 	hub := newHub()
 	go hub.run()
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 	})
-	err := http.ListenAndServe(*addr, nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
+
+	logger.Infof("Listening on port %v", *addr)
+	logger.Fatal(http.ListenAndServe(*addr, nil))
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
+	logger.Debug(r.URL)
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", 404)
 		return
@@ -46,7 +52,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		logger.Error(err)
 		return
 	}
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}

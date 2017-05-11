@@ -3,39 +3,39 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
+	"github.com/Sirupsen/logrus"
+
 	"gitlab.com/lucasefe/spotcast/spoty"
+	"gitlab.com/lucasefe/spotcast/util"
 )
 
 var (
 	serverAddress = flag.String("remote", "localhost:8081", "remote server host:port")
-	verbose       = flag.Bool("verbose", false, "enable verbose mode")
 	devmode       = flag.Bool("dev", false, "enable dev mode")
+	httpEnabled   = flag.Bool("httpEnabled", false, "enable http server")
 
 	channel *Channel
 	player  spoty.Session
+
+	logger *logrus.Logger
 )
 
 func main() {
 	flag.Parse()
-	log.SetFlags(0)
-
+	logger = util.NewLogger()
 	player = getPlayer(*devmode)
-
-	if *verbose || *devmode {
-		player.SetVerbose()
-	}
 
 	closeWebsocket := make(chan bool)
 	defer close(closeWebsocket)
 
 	c, err := NewChannel(*serverAddress)
 	if err != nil {
-		log.Fatalf("Could not create channel: %v", err)
+		logger.Fatalf("Could not create channel: %v", err)
 	}
 
 	channel = c
@@ -45,7 +45,10 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	srv := startHTTPServer()
+	var srv *http.Server
+	if *httpEnabled {
+		srv = startHTTPServer()
+	}
 
 	go playerPoller()
 
@@ -57,7 +60,9 @@ mainLoop:
 			break
 
 		case <-interrupt:
-			srv.Shutdown(context.Background())
+			if srv != nil {
+				srv.Shutdown(context.Background())
+			}
 			closeWebsocket <- true
 			break mainLoop
 		}
@@ -73,13 +78,13 @@ func playerPoller() {
 		time.Sleep(time.Second)
 		result, err := player.Status()
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 
 		if lastResult == nil || (lastResult.Track.CurrentSongURI() != result.Track.CurrentSongURI()) {
 			lastResult = result
 			track := result.Track
-			log.Printf("Now Playing %+s, %+v\n", track.CurrentSongTitle(), track.CurrentSongURI())
+			logger.Debugf("Now Playing %+s, %+v\n", track.CurrentSongTitle(), track.CurrentSongURI())
 		}
 	}
 }
@@ -103,5 +108,5 @@ func playSong(data map[string]string) {
 		return
 	}
 
-	log.Printf("Wrong data: %+v", data)
+	logger.Warningf("Wrong data: %+v", data)
 }

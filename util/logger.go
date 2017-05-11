@@ -13,6 +13,7 @@ func NewLogger() *logrus.Logger {
 	log.Out = os.Stdout
 	log.Level = logrus.WarnLevel
 	log.Formatter = new(prefixed.TextFormatter)
+	log.Level = logrus.DebugLevel
 
 	return log
 }

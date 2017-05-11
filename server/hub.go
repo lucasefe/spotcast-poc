@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/labstack/gommon/log"
 	"gitlab.com/lucasefe/spotcast/util"
 )
 
@@ -42,11 +41,6 @@ func (h *Hub) run() {
 			h.addClient(client)
 		case client := <-h.unregister:
 			h.removeClient(client)
-		case client := <-h.unregister:
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
-				close(client.send)
-			}
 		case message := <-h.broadcast:
 			for client := range h.clients {
 				select {
@@ -62,10 +56,13 @@ func (h *Hub) run() {
 
 func (h *Hub) addClient(client *Client) {
 	h.clients[client] = true
-	log.Debugf("Clients: %d%", len(h.clients))
+	h.log.Infof("-> Clients: %d", len(h.clients))
 }
 
 func (h *Hub) removeClient(client *Client) {
-	delete(h.clients, client)
-	log.Debugf("Clients: %d%", len(h.clients))
+	if _, ok := h.clients[client]; ok {
+		delete(h.clients, client)
+		close(client.send)
+		h.log.Infof("<- Clients: %d", len(h.clients))
+	}
 }

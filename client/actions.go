@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 )
 
 // Action ..
@@ -20,7 +19,7 @@ const (
 func handleAction(message string) {
 	action, err := parseAction(message)
 	if err != nil {
-		log.Printf("Could not parse message %+v. Got error: %s", message, err)
+		logger.Warningf("Could not parse message %+v. Got error: %s", message, err)
 	}
 
 	switch action.Type {
@@ -31,7 +30,7 @@ func handleAction(message string) {
 		player.Pause()
 		break
 	default:
-		log.Printf("Don't know what this means: %+v", message)
+		logger.Warningf("Don't know what this means: %+v", message)
 	}
 }
 

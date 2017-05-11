@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"time"
 
@@ -18,7 +17,7 @@ type Channel struct {
 // NewChannel creates a new Channel
 func NewChannel(addr string) (*Channel, error) {
 	u := url.URL{Scheme: "ws", Host: addr, Path: "/ws"}
-	log.Printf("connecting to %s", u.String())
+	logger.Debugf("connecting to %s", u.String())
 
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
@@ -46,7 +45,7 @@ loop:
 		case <-stop:
 			err := c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
-				log.Println("write close:", err)
+				logger.Debug("write close:", err)
 			}
 			select {
 			case <-done:
@@ -60,10 +59,10 @@ loop:
 
 // Send sends a text message through the active websocket connection
 func (c *Channel) Send(text []byte) {
-	log.Printf("Sending action: %+v", string(text))
+	logger.Debugf("Sending action: %+v", string(text))
 	err := c.conn.WriteMessage(websocket.TextMessage, text)
 	if err != nil {
-		log.Println("write:", err)
+		logger.Debug("write:", err)
 		return
 	}
 }
@@ -83,11 +82,11 @@ func ReadMessages(c *Channel, done chan struct{}) {
 
 		// TODO: Proper logging
 		if err != nil {
-			log.Println("read:", err)
+			logger.Debug("read:", err)
 			return
 		}
 
-		log.Printf("Receiving action: %+v", string(message))
+		logger.Debugf("Receiving action: %+v", string(message))
 		c.Receive <- string(message)
 	}
 }
