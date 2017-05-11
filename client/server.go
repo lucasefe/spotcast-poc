@@ -13,10 +13,12 @@ func startHTTPServer() *http.Server {
 	router.POST("/pause", pause)
 	router.POST("/stop", pause)
 
-	srv := &http.Server{Addr: ":8080"}
+	addr := ":8080"
+	srv := &http.Server{Addr: addr}
 	srv.Handler = router
 
 	go func() {
+		logger.Infof("HTTP Server listening on: %s", addr)
 		if err := srv.ListenAndServe(); err != nil {
 			logger.Warningf("Httpserver: ListenAndServe() error: %s", err)
 		}

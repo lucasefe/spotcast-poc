@@ -34,8 +34,9 @@ func (f *FakedSession) Pause() (*Result, error) {
 }
 
 // Play implements Session.Play
-func (f *FakedSession) Play(string) (*Result, error) {
+func (f *FakedSession) Play(songURI string) (*Result, error) {
 	f.lastResult.Playing = true
+	f.lastResult.Track.TrackResource.URI = songURI
 	return f.lastResult, nil
 }
 

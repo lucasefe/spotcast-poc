@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+
 	"github.com/Sirupsen/logrus"
 	"gitlab.com/lucasefe/spotcast/util"
 )
@@ -57,6 +59,10 @@ func (h *Hub) run() {
 func (h *Hub) addClient(client *Client) {
 	h.clients[client] = true
 	h.log.Infof("-> Clients: %d", len(h.clients))
+
+	if len(h.clients) == 1 {
+		client.send <- leaderAction()
+	}
 }
 
 func (h *Hub) removeClient(client *Client) {
@@ -64,5 +70,22 @@ func (h *Hub) removeClient(client *Client) {
 		delete(h.clients, client)
 		close(client.send)
 		h.log.Infof("<- Clients: %d", len(h.clients))
+
+		if len(h.clients) == 1 {
+			client.send <- leaderAction()
+		}
 	}
+}
+
+// Action is..
+type Action struct {
+	Type string            `json:"type"`
+	Data map[string]string `json:"data"`
+}
+
+func leaderAction() []byte {
+	data := map[string]string{"role": "leader"}
+	action := &Action{Type: "SET_ROLE", Data: data}
+	message, _ := json.Marshal(action)
+	return message
 }

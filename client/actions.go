@@ -14,6 +14,7 @@ const (
 	pauseActionType    = "PAUSE"
 	playSongActionType = "PLAY_SONG"
 	stopActionType     = "STOP"
+	setRoleActiontype  = "SET_ROLE"
 )
 
 func handleAction(message string) {
@@ -23,6 +24,9 @@ func handleAction(message string) {
 	}
 
 	switch action.Type {
+	case setRoleActiontype:
+		setRole(action.Data)
+		break
 	case playSongActionType:
 		playSong(action.Data)
 		break
