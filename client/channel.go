@@ -37,22 +37,8 @@ func NewChannel(addr string) (*Channel, error) {
 func (c *Channel) Connect(stop chan bool) {
 	done := make(chan struct{})
 
-	go func() {
-		defer c.Close()
-		defer close(done)
-		for {
-			_, message, err := c.conn.ReadMessage()
-
-			// TODO: Proper logging
-			if err != nil {
-				log.Println("read:", err)
-				return
-			}
-
-			log.Printf("Receiving action: %+v", string(message))
-			c.Receive <- string(message)
-		}
-	}()
+	// read messages
+	go ReadMessages(c, done)
 
 loop:
 	for {
@@ -85,4 +71,23 @@ func (c *Channel) Send(text []byte) {
 // Close closes channel allocated resources
 func (c *Channel) Close() {
 	c.conn.Close()
+}
+
+// ReadMessages reads messages from websocket
+func ReadMessages(c *Channel, done chan struct{}) {
+	defer c.Close()
+	defer close(done)
+
+	for {
+		_, message, err := c.conn.ReadMessage()
+
+		// TODO: Proper logging
+		if err != nil {
+			log.Println("read:", err)
+			return
+		}
+
+		log.Printf("Receiving action: %+v", string(message))
+		c.Receive <- string(message)
+	}
 }
