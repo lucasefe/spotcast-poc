@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
+	"os"
 	"util"
 
 	"github.com/Sirupsen/logrus"
@@ -15,8 +17,8 @@ var upgrader = websocket.Upgrader{
 }
 
 var (
-	addr   = flag.String("addr", ":8081", "http service address")
-	logger *logrus.Logger
+	address = flag.String("addr", ":8081", "http service address")
+	logger  *logrus.Logger
 )
 
 func main() {
@@ -30,8 +32,13 @@ func main() {
 		serveWs(hub, w, r)
 	})
 
-	logger.Infof("Listening on port %v", *addr)
-	logger.Fatal(http.ListenAndServe(*addr, nil))
+	addr := *address
+	if port, ok := os.LookupEnv("PORT"); ok {
+		addr = fmt.Sprintf(":%s", port)
+	}
+
+	logger.Infof("Listening on port %v", addr)
+	logger.Fatal(http.ListenAndServe(addr, nil))
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
