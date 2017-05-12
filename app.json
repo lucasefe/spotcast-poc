@@ -2,10 +2,10 @@
   "name": "Spotcast Server",
   "description": "A Spotcast server instance",
   "repository": "https://github.com/lucasefe/spotcast",
-  "keywords": ["golang", "spotify", "remote"]
+  "keywords": ["golang", "spotify", "remote"],
   "buildpacks": [
     {
-      "url": "https://github.com/stomita/heroku-buildpack-phantomjs"
+      "url": "https://github.com/lucasefe/heroku-buildpack-go"
     }
   ]
 }
