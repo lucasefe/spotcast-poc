@@ -79,7 +79,7 @@
     <script type="text/javascript">
       $(document).ready(function(){
         var currentLocation = window.location.host
-        $("#current_url").html(currentLocation);
+        $(".current_url").html(currentLocation);
       })
     </script>
   </head>
@@ -101,11 +101,11 @@ brew install spotcast-server</code></pre>
 
       <p>And after that, run it like this: </p>
 
-      <pre><code>spotcast-client<span id="current_url"></span></code></pre>
+      <pre><code>spotcast-client -remote <span class="current_url"></span></code></pre>
 
       <p>And if you want to connect to a specific channel </p>
 
-      <pre><code>spotcast-client<span id="current_url"></span> -channel boom</code></pre>
+      <pre><code>spotcast-client -remote <span class="current_url"></span> -channel boom</code></pre>
 
       <h2>Source code</h2>
       <p>
