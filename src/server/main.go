@@ -23,18 +23,13 @@ var (
 	logger  *logrus.Logger
 )
 
-var homePage string
-
 func main() {
 	flag.Parse()
 	logger = util.NewLogger()
 
-	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	homePage = path.Join(dir, "../public/index.html")
-
 	hub := newHub()
 	go hub.run()
-	http.HandleFunc("/", serveHome)
+	http.HandleFunc("/", webHandler())
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 	})
@@ -48,24 +43,37 @@ func main() {
 	logger.Fatal(http.ListenAndServe(addr, nil))
 }
 
-func serveHome(w http.ResponseWriter, r *http.Request) {
-	logger.Debug(r.URL)
+func webHandler() func(http.ResponseWriter, *http.Request) {
+	var webRoot string
 
-	if r.URL.Path != "/" {
-		http.Error(w, "Not found", 404)
-		return
+	if root, ok := os.LookupEnv("SPOTCAST_WEBROOT"); ok {
+		webRoot = root
+	} else {
+		dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+		webRoot = path.Join(dir, "../public")
 	}
 
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", 405)
-		return
-	}
+	homePage := fmt.Sprintf("%s/%s", webRoot, "index.html")
 
-	if _, err := os.Stat(homePage); os.IsNotExist(err) {
-		logger.Warning(err)
-	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		logger.Debug(r.URL)
 
-	http.ServeFile(w, r, homePage)
+		if r.URL.Path != "/" {
+			http.Error(w, "Not found", 404)
+			return
+		}
+
+		if r.Method != "GET" {
+			http.Error(w, "Method not allowed", 405)
+			return
+		}
+
+		if _, err := os.Stat(homePage); os.IsNotExist(err) {
+			logger.Warning(err)
+		}
+
+		http.ServeFile(w, r, homePage)
+	}
 }
 
 // serveWs handles websocket requests from the peer.
