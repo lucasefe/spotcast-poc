@@ -5,7 +5,6 @@ type Session interface {
 	Pause() (*Result, error)
 	Play(string) (*Result, error)
 	Resume() (*Result, error)
-	SetVerbose()
 	Status() (*Result, error)
 }
 
@@ -50,6 +49,3 @@ func (f *FakedSession) Resume() (*Result, error) {
 func (f *FakedSession) Status() (*Result, error) {
 	return f.lastResult, nil
 }
-
-// SetVerbose implements Session.SetVerbose
-func (*FakedSession) SetVerbose() {}

@@ -70,10 +70,6 @@ func (h *Hub) removeClient(client *Client) {
 		delete(h.clients, client)
 		close(client.send)
 		h.log.Infof("<- Clients: %d", len(h.clients))
-
-		if len(h.clients) == 1 {
-			client.send <- leaderAction()
-		}
 	}
 }
 

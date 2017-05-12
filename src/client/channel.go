@@ -58,13 +58,14 @@ loop:
 }
 
 // Send sends a text message through the active websocket connection
-func (c *Channel) Send(text []byte) {
+func (c *Channel) Send(text []byte) error {
 	logger.Debugf("Sending action: %+v", string(text))
 	err := c.conn.WriteMessage(websocket.TextMessage, text)
 	if err != nil {
-		logger.Debug("write:", err)
-		return
+		return fmt.Errorf("Could not send message through channel: %v", err)
 	}
+
+	return nil
 }
 
 // Close closes channel allocated resources

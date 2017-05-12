@@ -29,23 +29,13 @@ func startHTTPServer() *http.Server {
 
 func play(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	songURI := ps.ByName("songURI")
-	message, err := playSongAction(songURI)
-	if err != nil {
-		http.Error(w, "Error", 500) // Or Redirect?
-		logger.Errorf("Error attempting to send play. Error: %s", err)
-	}
-
+	message := playSongAction(songURI)
 	channel.Send(message)
 	fmt.Fprint(w, fmt.Sprintf("Requesting play of song: %+v\n", songURI))
 }
 
 func pause(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	message, err := pauseAction()
-	if err != nil {
-		http.Error(w, "Error", 500) // Or Redirect?
-		logger.Errorf("Error attempting to send pause. Error: %s", err)
-	}
-
+	message := pauseAction()
 	channel.Send(message)
 	fmt.Fprint(w, "Requesting pause")
 }

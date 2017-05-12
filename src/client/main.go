@@ -20,7 +20,7 @@ type Role string
 const (
 	// LeaderRole get to decide what to play, by selecting the song on the player.
 	LeaderRole = "leader"
-	// FollowerRole don't listen to the current player for changes
+	// FollowerRole do not listen to the current player for changes
 	FollowerRole = "follower"
 )
 
@@ -82,8 +82,47 @@ mainLoop:
 	<-time.After(time.Second)
 }
 
+func nowPlaying(result *spoty.Result) {
+	logger.Debugf("Now Playing %+s, %+v\n", result.Track.CurrentSongTitle(), result.Track.CurrentSongURI())
+}
+
 func playerPoller() {
 	var lastResult *spoty.Result
+
+	var process = func(result *spoty.Result) {
+		defer func() { lastResult = result }()
+
+		// First run, or same song
+		sameSong := lastResult != nil && result.Track.CurrentSongURI() == lastResult.Track.CurrentSongURI()
+		if !sameSong {
+			nowPlaying(result)
+		}
+
+		if role != LeaderRole || lastResult == nil {
+			return
+		}
+
+		playToPause := lastResult.Playing && !result.Playing
+		pauseToPlay := !lastResult.Playing && result.Playing
+		// logger.Debugf("Player status: playToPause=%v pauseToPlay=%v\n", playToPause, pauseToPlay)
+
+		if !sameSong {
+			logger.Debugf("Sending Play")
+			channel.Send(playSongAction(result.Track.CurrentSongURI()))
+			return
+		}
+
+		if playToPause {
+			logger.Debugf("Sending Pause")
+			channel.Send(pauseAction())
+			return
+		}
+
+		if pauseToPlay {
+			logger.Debugf("Sending Resume")
+			channel.Send(resumeAction())
+		}
+	}
 
 	for {
 		time.Sleep(time.Second)
@@ -92,21 +131,7 @@ func playerPoller() {
 			logger.Fatal(err)
 		}
 
-		if lastResult == nil || (lastResult.Track.CurrentSongURI() != result.Track.CurrentSongURI()) {
-			lastResult = result
-			track := result.Track
-			logger.Debugf("Now Playing %+s, %+v\n", track.CurrentSongTitle(), track.CurrentSongURI())
-
-			if role == LeaderRole {
-				message, err := playSongAction(track.CurrentSongURI())
-				if err != nil {
-					logger.Errorf("Error attempting to send play. Error: %s", err)
-					break
-				}
-
-				channel.Send(message)
-			}
-		}
+		process(result)
 	}
 }
 
@@ -121,28 +146,4 @@ func getPlayer(faked bool) spoty.Session {
 	}
 
 	return player
-}
-
-func playSong(data map[string]string) {
-	song, ok := data["song"]
-
-	if !ok {
-		logger.Warningf("Wrong data: %+v", data)
-		return
-	}
-
-	if role == LeaderRole {
-		logger.Warningf("Not gonna play song %s, I'm a leader!", song)
-		return
-	}
-
-	player.Play(song)
-
-}
-
-func setRole(data map[string]string) {
-	if newRole, ok := data["role"]; ok {
-		logger.Infof("Setting new role: %s", newRole)
-		role = Role(newRole)
-	}
 }

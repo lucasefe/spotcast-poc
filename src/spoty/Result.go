@@ -5,10 +5,13 @@ type Result struct {
 	ClientVersion string `json:"client_version"`
 	Version       int    `json:"version"`
 
-	Running bool `json:"running"`
-	Playing bool `json:"playing"`
-	Shuffle bool `json:"shuffle"`
-	Repeat  bool `json:"repeat"`
+	Running         bool    `json:"running"`
+	Playing         bool    `json:"playing"`
+	PlayingPosition float64 `json:"playing_position"`
+	Shuffle         bool    `json:"shuffle"`
+	Repeat          bool    `json:"repeat"`
+	Online          bool    `json:"online"`
+	Volume          int     `json:"volume"`
 
 	Error struct {
 		Type    string `json:"type"`

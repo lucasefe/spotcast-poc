@@ -48,11 +48,6 @@ func NewSession() (*RealSession, error) {
 	return session, nil
 }
 
-// SetVerbose enables verbose level on the logger
-func (s *RealSession) SetVerbose() {
-	s.log.Level = logrus.DebugLevel
-}
-
 // Status fetches the current status
 func (s *RealSession) Status() (*Result, error) {
 	params := getAuthParams(s)

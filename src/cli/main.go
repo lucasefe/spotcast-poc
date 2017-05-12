@@ -14,7 +14,6 @@ var session spoty.Session
 
 func main() {
 	session, _ = spoty.NewSession()
-	session.SetVerbose()
 
 	if len(os.Args) == 1 {
 		fmt.Println("Not enough arguments")
