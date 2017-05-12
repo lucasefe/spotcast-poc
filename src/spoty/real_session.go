@@ -175,7 +175,6 @@ func getURL(path string) string {
 	return fmt.Sprintf("https://%s:%d%s", generateLocalHostname(), 4370, path)
 }
 
-// TODO: It needs to be dynamic.
 func generateLocalHostname() string {
-	return "lucassa1fe.spotilocal.com"
+	return fmt.Sprintf("%s.spotilocal.com", util.RandomSeq(10))
 }
