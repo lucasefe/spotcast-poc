@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path"
+	"path/filepath"
 	"util"
 
 	"github.com/Sirupsen/logrus"
@@ -21,9 +23,14 @@ var (
 	logger  *logrus.Logger
 )
 
+var homePage string
+
 func main() {
 	flag.Parse()
 	logger = util.NewLogger()
+
+	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	homePage = path.Join(dir, "../public/index.html")
 
 	hub := newHub()
 	go hub.run()
@@ -43,15 +50,22 @@ func main() {
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	logger.Debug(r.URL)
+
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", 404)
 		return
 	}
+
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", 405)
 		return
 	}
-	http.ServeFile(w, r, "home.html")
+
+	if _, err := os.Stat(homePage); os.IsNotExist(err) {
+		logger.Warning(err)
+	}
+
+	http.ServeFile(w, r, homePage)
 }
 
 // serveWs handles websocket requests from the peer.
