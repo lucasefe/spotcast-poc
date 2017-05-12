@@ -6,3 +6,4 @@ src/server/server
 src/client/client
 
 .dependencies
+.env
