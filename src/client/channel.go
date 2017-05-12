@@ -15,8 +15,9 @@ type Channel struct {
 }
 
 // NewChannel creates a new Channel
-func NewChannel(addr string) (*Channel, error) {
-	u := url.URL{Scheme: "ws", Host: addr, Path: "/ws"}
+func NewChannel(addr, channelName string) (*Channel, error) {
+	channelPath := fmt.Sprintf("/channel/%s", channelName)
+	u := url.URL{Scheme: "ws", Host: addr, Path: channelPath}
 	logger.Debugf("connecting to %s", u.String())
 
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)

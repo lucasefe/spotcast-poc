@@ -23,16 +23,20 @@ type Hub struct {
 	unregister chan *Client
 
 	// logger
-	log *logrus.Logger
+	log *logrus.Entry
+
+	// a name to identify it.
+	name string
 }
 
-func newHub() *Hub {
+func newHub(name string) *Hub {
 	return &Hub{
+		name:       name,
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
-		log:        util.NewLogger(),
+		log:        util.NewLogger().WithField("channel", name),
 	}
 }
 

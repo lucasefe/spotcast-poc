@@ -11,6 +11,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
+	"github.com/julienschmidt/httprouter"
 )
 
 var upgrader = websocket.Upgrader{
@@ -23,14 +24,18 @@ var (
 	logger  *logrus.Logger
 )
 
+var hubs = map[string]*Hub{}
+
 func main() {
 	flag.Parse()
 	logger = util.NewLogger()
 
-	hub := newHub()
-	go hub.run()
-	http.HandleFunc("/", webHandler())
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	router := httprouter.New()
+	router.GET("/", webHandler())
+	router.GET("/channel/:name", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		name := ps.ByName("name")
+		hub := getHub(name)
+
 		serveWs(hub, w, r)
 	})
 
@@ -40,10 +45,24 @@ func main() {
 	}
 
 	logger.Infof("Listening on port %v", addr)
-	logger.Fatal(http.ListenAndServe(addr, nil))
+	logger.Fatal(http.ListenAndServe(addr, router))
 }
 
-func webHandler() func(http.ResponseWriter, *http.Request) {
+func getHub(name string) *Hub {
+	// Do we have a channel with this name already?
+	if hub, ok := hubs[name]; ok {
+		return hub
+	}
+
+	// New hub for the channel
+	hub := newHub(name)
+	hubs[name] = hub
+	go hub.run()
+
+	return hub
+}
+
+func webHandler() func(http.ResponseWriter, *http.Request, httprouter.Params) {
 	var webRoot string
 
 	if root, ok := os.LookupEnv("SPOTCAST_WEBROOT"); ok {
@@ -55,7 +74,7 @@ func webHandler() func(http.ResponseWriter, *http.Request) {
 
 	homePage := fmt.Sprintf("%s/%s", webRoot, "index.html")
 
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		logger.Debug(r.URL)
 
 		if r.URL.Path != "/" {

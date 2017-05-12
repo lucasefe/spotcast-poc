@@ -28,6 +28,7 @@ var (
 	serverAddress = flag.String("remote", "localhost:8081", "remote server host:port")
 	devmode       = flag.Bool("dev", false, "enable dev mode")
 	httpEnabled   = flag.Bool("httpEnabled", false, "enable http server")
+	channelName   = flag.String("channel", "general", "channel name")
 
 	channel *Channel
 	player  spoty.Session
@@ -44,7 +45,7 @@ func main() {
 	closeWebsocket := make(chan bool)
 	defer close(closeWebsocket)
 
-	c, err := NewChannel(*serverAddress)
+	c, err := NewChannel(*serverAddress, *channelName)
 	if err != nil {
 		logger.Fatalf("Could not create channel: %v", err)
 	}
