@@ -82,10 +82,6 @@ mainLoop:
 	<-time.After(time.Second)
 }
 
-func nowPlaying(result *spoty.Result) {
-	logger.Debugf("Now Playing %+s, %+v\n", result.Track.CurrentSongTitle(), result.Track.CurrentSongURI())
-}
-
 func playerPoller() {
 	var lastResult *spoty.Result
 
@@ -95,7 +91,7 @@ func playerPoller() {
 		// First run, or same song
 		sameSong := lastResult != nil && result.Track.CurrentSongURI() == lastResult.Track.CurrentSongURI()
 		if !sameSong {
-			nowPlaying(result)
+			logger.Debugf("Now Playing %+s, %+v\n", result.Track.CurrentSongTitle(), result.Track.CurrentSongURI())
 		}
 
 		if role != LeaderRole || lastResult == nil {
