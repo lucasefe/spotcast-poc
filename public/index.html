@@ -1,23 +1,44 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
     <meta charset="utf-8">
-    <title>Spotcast Server</title>
+    <meta name="author" content="Furio">
+    <meta content="width=device-width,initial-scale=1.0" name="viewport">
+    <title>Spotcast</title>
+    <link rel="icon" type="image/ico" href="https://open.scdn.co/static/images/favicon.png" sizes="16x16">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat|Slabo+27px" rel="stylesheet">
+    <link href="spotcast.css" rel="stylesheet">
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.min.js"
+      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+      crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        var currentLocation = window.location.host
+        $("#current_url").html(currentLocation);
+      })
+    </script>
   </head>
+
   <body>
-    <h1>Spotcast Server</h1>
 
-    <h2>Install</h2>
+    <header>
+      <div class="wrapper">
+        <h1>Spotcast</h1>
+      </div>
+    </header>
+    <div class="wrapper">
+      <p>Spotcast allows one spotify desktop client to drive other spotify desktop clients.</p>
+      <p>In order to achieve this, you need to install a client binary on each machine running Spotify, and have one server binary running somewhere, available to anyone.</p>
 
-    <pre><code>
-      brew tap lucasefe/spotcast
-      brew install spotcast-client
-    </code></pre>
+      <h2>Installation</h2>
+      <pre><code>brew tap lucasefe/spotcast
+brew install spotcast-server</code></pre>
 
-    <h2>Run</h2>
+      <p>Lorem ipsum dolor sit amet, <a href="#">consectetur adipisicing elit,</a> sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-    <pre><code>
-      spotcast-client -remote your-server-url
-    </code></pre>
+      <pre><code>spotcast-client<span id="current_url"></span></code></pre>
+    </div>
   </body>
 </html>

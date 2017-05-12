@@ -1,0 +1,61 @@
+html, body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: #f6f6f6;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+header {
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#f6f8f9+0,e5ebee+50,d7dee3+51,f5f7f9+100;White+Gloss */
+background: #f6f8f9; /* Old browsers */
+background: -moz-linear-gradient(-45deg, #f6f8f9 0%, #e5ebee 50%, #d7dee3 51%, #f5f7f9 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(-45deg, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(135deg, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f6f8f9', endColorstr='#f5f7f9',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+  border-top: 5px solid #25D34D;
+  /*color: #25D34D;*/
+  padding: 60px 0 10px;
+  margin-bottom: 40px;
+}
+
+p {
+  margin-top: 30px;
+  font-family: 'Slabo 27px';
+  font-size: 18px;
+}
+h2 {
+  margin-top: 30px;  
+}
+
+pre {#5C39B4;
+  background-color: #EFEFEF;
+  border-radius: 3px;
+  font-size: 85%;
+  line-height: 1.45;
+  overflow: auto;
+  padding: 16px;
+  margin-top: 30px;
+}
+code {
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: #5C39B4;
+}
+a:hover {
+  color: gray;
+}
