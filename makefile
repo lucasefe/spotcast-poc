@@ -1,4 +1,7 @@
-all: bin/client bin/server
+all: bin/client bin/server bin/cli
+
+bin/cli: bin
+	go build -o $@ src/cli/*.go
 
 bin/client: bin
 	go build -o $@ src/client/*.go
