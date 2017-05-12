@@ -7,5 +7,10 @@
     {
       "url": "https://github.com/lucasefe/heroku-buildpack-go"
     }
-  ]
+  ],
+  "env": {
+    "SPOTCAST_WEBROOT": {
+      "description": "PATH to web root, where pages are stored",
+      "value": "/app/public"
+    },
 }
