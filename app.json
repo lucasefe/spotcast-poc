@@ -12,5 +12,6 @@
     "SPOTCAST_WEBROOT": {
       "description": "PATH to web root, where pages are stored",
       "value": "/app/public"
-    },
+    }
+  }
 }

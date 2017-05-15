@@ -19,4 +19,7 @@ cross-compile: bin/client bin/server
 clean:
 	rm -rf pkg bin
 
+watch:
+	find src -name *.go | entr make clean all
+
 .PHONY: cross-compile clean

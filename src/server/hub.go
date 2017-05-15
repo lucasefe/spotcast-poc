@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"util"
 
 	"github.com/Sirupsen/logrus"
 )
@@ -27,6 +26,9 @@ type Hub struct {
 
 	// a name to identify it.
 	name string
+
+	// leader
+	leader *Client
 }
 
 func newHub(name string) *Hub {
@@ -36,7 +38,7 @@ func newHub(name string) *Hub {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
-		log:        util.NewLogger().WithField("channel", name),
+		log:        logger.WithField("channel", name),
 	}
 }
 
@@ -64,13 +66,19 @@ func (h *Hub) addClient(client *Client) {
 	h.clients[client] = true
 	h.log.Infof("-> Clients: %d", len(h.clients))
 
-	if len(h.clients) == 1 {
+	if h.leader == nil {
+		h.leader = client
 		client.send <- leaderAction()
 	}
 }
 
 func (h *Hub) removeClient(client *Client) {
 	if _, ok := h.clients[client]; ok {
+		if h.leader == client {
+			h.log.Debug("Leader leaving")
+			h.leader = nil
+		}
+
 		delete(h.clients, client)
 		close(client.send)
 		h.log.Infof("<- Clients: %d", len(h.clients))
