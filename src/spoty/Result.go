@@ -11,7 +11,7 @@ type Result struct {
 	Shuffle         bool    `json:"shuffle"`
 	Repeat          bool    `json:"repeat"`
 	Online          bool    `json:"online"`
-	Volume          int     `json:"volume"`
+	Volume          float64 `json:"volume"`
 
 	Error struct {
 		Type    string `json:"type"`
