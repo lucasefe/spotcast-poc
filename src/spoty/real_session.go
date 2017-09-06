@@ -172,9 +172,5 @@ func errorOnResult(result *Result) error {
 }
 
 func getURL(path string) string {
-	return fmt.Sprintf("https://%s:%d%s", generateLocalHostname(), 4370, path)
-}
-
-func generateLocalHostname() string {
-	return fmt.Sprintf("%s.spotilocal.com", util.RandomSeq(10))
+	return fmt.Sprintf("http://127.0.0.1:%d%s", 4381, path)
 }
