@@ -41,6 +41,19 @@ type Client struct {
 	send chan []byte
 }
 
+// NewClient creates and starts a new client
+func NewClient(hub *Hub, conn *websocket.Conn) *Client {
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client.hub.register <- client
+	return client
+}
+
+// Start kick starts consumption
+func (c *Client) Start() {
+	go c.writePump()
+	c.readPump()
+}
+
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application
@@ -51,9 +64,11 @@ func (c *Client) readPump() {
 		c.hub.unregister <- c
 		c.conn.Close()
 	}()
+
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
@@ -78,6 +93,7 @@ func (c *Client) writePump() {
 		ticker.Stop()
 		c.conn.Close()
 	}()
+
 	for {
 		select {
 		case message, ok := <-c.send:
